@@ -6,7 +6,7 @@ from flask.ext.login import login_user, login_required, logout_user, current_use
 
 from . import auth
 from ..models import db, User
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ChangePwdForm
 from ..email import send_email
 
 __author__ = 'zhangmm'
@@ -36,7 +36,7 @@ def logout():
 def register():
     register_form = RegistrationForm()
     if register_form.validate_on_submit():
-        user = User(email=register_form.email.data, username=register_form.password.data,
+        user = User(email=register_form.email.data, username=register_form.username.data,
                     password=register_form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -80,3 +80,21 @@ def resend_confirmation():
     send_email(current_user.email, 'Confirm Your Account', 'auth/email/confirm', user=current_user, token=token)
     flash('A new confirmation email has been sent to you by email')
     return redirect(url_for('main.index'))
+
+
+@auth.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def change_pwd():
+    change_form = ChangePwdForm()
+    if change_form.validate_on_submit():
+        user = User.query.get(current_user.id)
+        if user.verify_password(change_form.oldpassword.data):
+            user.password = change_form.password.data
+            db.session.add(user)
+            db.session.commit()
+            logout_user()
+            flash('Your password has been changed, please login again.')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('Your old password is incorrect.')
+    return render_template('auth/changepassword.html', form=change_form)

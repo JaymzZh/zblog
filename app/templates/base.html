@@ -27,6 +27,7 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_authenticated %}
+                        <li><a href="javascript:">{{ current_user.username }}</a></li>
                         <li><a href="{{ url_for('auth.logout') }}">Sign Out</a></li>
                     {% else %}
                         <li><a href="{{ url_for('auth.login') }}">Sign In</a></li>
