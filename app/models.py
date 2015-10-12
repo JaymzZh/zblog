@@ -1,22 +1,13 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-import os
-
-from flask import Flask
+from flask.ext.login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
 
+from . import db
 from . import login_manager
 
 __author__ = 'zhangmm'
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'hard to guess string'
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 
 class Role(db.Model):
@@ -30,7 +21,7 @@ class Role(db.Model):
         return '<Role %r>' % self.name
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
