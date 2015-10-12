@@ -12,7 +12,7 @@ class Config():
     SECRET_KEY = os.environ.get("SECRET_KEY") or 'hard to guess key'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     ZBLOG_MAIL_SUBJECT_PREFIX = '[ZBlog]'
-    ZBLOG_MAIL_SENDER = 'ZBlog Admin <zblog@zhangmm.cn>'
+    ZBLOG_MAIL_SENDER = 'as1542963@163.com'
     ZBLOG_ADMIN = os.environ.get('ZBlog_ADMIN')
 
     @staticmethod
@@ -22,8 +22,8 @@ class Config():
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    MAIL_SERVER = 'smtp.qq.com'
-    MAIL_PORT = 587
+    MAIL_SERVER = 'smtp.163.com'
+    MAIL_PORT = 25
     MAIL_USER_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
