@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-from threading import Thread
-
 from flask import current_app, render_template
 from flask.ext.mail import Message
 
 from . import mail
+from .decorators import async
 
 __author__ = 'zhangmm'
 
 
+@async
 def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
@@ -22,6 +22,4 @@ def send_email(to, subject, template, **kwargs):
                   sender=app.config['ZBLOG_MAIL_SENDER'], recipients=[to])
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)
-    thr = Thread(target=send_async_email, args=[app, msg])
-    thr.start()
-    return thr
+    send_async_email(app, msg)
