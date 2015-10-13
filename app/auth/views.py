@@ -6,7 +6,7 @@ from flask.ext.login import login_user, login_required, logout_user, current_use
 
 from . import auth
 from ..models import db, User
-from .forms import LoginForm, RegistrationForm, ChangePwdForm, ResetPwdForm, ResetPwdRequestForm
+from .forms import LoginForm, RegistrationForm, ChangePwdForm, ResetPwdForm, ResetPwdRequestForm, ChangeEmailForm
 from ..email import send_email
 
 __author__ = 'zhangmm'
@@ -98,7 +98,7 @@ def change_password():
     return render_template('auth/change_password.html', form=form)
 
 
-@auth.route('/reset')
+@auth.route('/reset', methods=['GET', 'POST'])
 def password_reset_request():
     if not current_user.is_anonymous:
         return redirect(url_for('main.index'))
@@ -106,9 +106,55 @@ def password_reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            token = user.generate_confirmation_token()
+            token = user.generate_reset_token()
             send_email(current_user.email, 'Confirm Your Account',
                        'auth/email/reset', user=user, token=token)
             flash('A email with instructions to reset your password has been sent to you.')
             return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
+
+
+@auth.route('/reset/<token>')
+def password_reset(token):
+    if not current_user.is_anonymous:
+        return redirect('main.index')
+
+    form = ResetPwdForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is None:
+            return redirect(url_for('main.index'))
+        if user.reset_password(token, form.password.data):
+            logout_user()
+            flash('Your password has been updated.')
+            return redirect(url_for('auth.login'))
+        else:
+            return redirect(url_for('main.index'))
+    return render_template('auth/reset_password.html', form=form)
+
+
+@auth.route('/change-email', methods=['GET', 'POST'])
+@login_required
+def change_email_request():
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+            new_email = form.email.data
+            token = current_user.generate_email_change_token(new_email)
+            send_email(new_email, 'Confirm your email address', 'auth/email/change_email', user=current_user,
+                       token=token)
+            flash('An email with instructions to confirm your new email address has been sent to you')
+            return redirect(url_for('main.index'))
+        else:
+            flash('Invalid email or password.')
+    return render_template('auth/change_email.html', form=form)
+
+
+@auth.route('/change-email/<token>')
+@login_required
+def change_email(token):
+    if current_user.change_email(token):
+        flash('Your email address has been updated.')
+    else:
+        flash('Invalid request.')
+    return redirect(url_for('main.index'))
