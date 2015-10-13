@@ -37,7 +37,7 @@ class RegistrationForm(Form):
 
 
 class ChangePwdForm(Form):
-    oldpassword = PasswordField('Old password', validators=[DataRequired()])
+    old_password = PasswordField('Old password', validators=[DataRequired()])
     password = PasswordField('New password', validators=[DataRequired(), EqualTo('password2', message='Password must match.')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
     submit = SubmitField('Update')

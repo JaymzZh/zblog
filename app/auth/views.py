@@ -82,19 +82,17 @@ def resend_confirmation():
     return redirect(url_for('main.index'))
 
 
-@auth.route('/changepassword', methods=['GET', 'POST'])
+@auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
-def change_pwd():
+def change_password():
     change_form = ChangePwdForm()
     if change_form.validate_on_submit():
-        user = User.query.get(current_user.id)
-        if user.verify_password(change_form.oldpassword.data):
-            user.password = change_form.password.data
-            db.session.add(user)
-            db.session.commit()
+        if current_user.verify_password(change_form.old_password.data):
+            current_user.password = change_form.password.data
+            db.session.add(current_user)
             logout_user()
             flash('Your password has been changed, please login again.')
             return redirect(url_for('auth.login'))
         else:
             flash('Your old password is incorrect.')
-    return render_template('auth/changepassword.html', form=change_form)
+    return render_template('auth/change_password.html', form=change_form)
