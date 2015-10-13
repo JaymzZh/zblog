@@ -38,6 +38,19 @@ class RegistrationForm(Form):
 
 class ChangePwdForm(Form):
     old_password = PasswordField('Old password', validators=[DataRequired()])
-    password = PasswordField('New password', validators=[DataRequired(), EqualTo('password2', message='Password must match.')])
+    password = PasswordField('New password',
+                             validators=[DataRequired(), EqualTo('password2', message='Password must match.')])
     password2 = PasswordField('Confirm password', validators=[DataRequired()])
     submit = SubmitField('Update')
+
+
+class ResetPwdRequestForm(Form):
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64), Email()])
+    submit = SubmitField('Reset')
+
+
+class ResetPwdForm(Form):
+    password = PasswordField('New password',
+                             validators=[DataRequired(), EqualTo('password2', message='Password must match.')])
+    password2 = PasswordField('Confirm password', validators=[DataRequired()])
+    submit = SubmitField('Reset')

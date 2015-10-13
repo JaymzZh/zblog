@@ -6,7 +6,7 @@ from flask.ext.login import login_user, login_required, logout_user, current_use
 
 from . import auth
 from ..models import db, User
-from .forms import LoginForm, RegistrationForm, ChangePwdForm
+from .forms import LoginForm, RegistrationForm, ChangePwdForm, ResetPwdForm, ResetPwdRequestForm
 from ..email import send_email
 
 __author__ = 'zhangmm'
@@ -14,14 +14,14 @@ __author__ = 'zhangmm'
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    login_form = LoginForm()
-    if login_form.validate_on_submit():
-        user = User.query.filter_by(email=login_form.email.data).first()
-        if user is not None and user.verify_password(login_form.password.data):
-            login_user(user, login_form.remember_me.data)
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('main.index'))
         flash('Invalid username or password.')
-    return render_template('auth/login.html', form=login_form)
+    return render_template('auth/login.html', form=form)
 
 
 @auth.route('/logout')
@@ -34,18 +34,18 @@ def logout():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    register_form = RegistrationForm()
-    if register_form.validate_on_submit():
-        user = User(email=register_form.email.data, username=register_form.username.data,
-                    password=register_form.password.data)
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data, username=form.username.data,
+                    password=form.password.data)
         db.session.add(user)
         db.session.commit()
         token = user.generate_confirmation_token()
         send_email(user.email, 'Confirm Your Account',
                    'auth/email/confirm', user=user, token=token)
-        flash('A confirmation email has been sent to you by email..')
+        flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/register.html', form=register_form)
+    return render_template('auth/register.html', form=form)
 
 
 @auth.route('/confirm/<token>')
@@ -78,21 +78,37 @@ def unconfirmed():
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account', 'auth/email/confirm', user=current_user, token=token)
-    flash('A new confirmation email has been sent to you by email')
+    flash('A new confirmation email has been sent to you by email.')
     return redirect(url_for('main.index'))
 
 
 @auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    change_form = ChangePwdForm()
-    if change_form.validate_on_submit():
-        if current_user.verify_password(change_form.old_password.data):
-            current_user.password = change_form.password.data
+    form = ChangePwdForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.old_password.data):
+            current_user.password = form.password.data
             db.session.add(current_user)
             logout_user()
             flash('Your password has been changed, please login again.')
             return redirect(url_for('auth.login'))
         else:
             flash('Your old password is incorrect.')
-    return render_template('auth/change_password.html', form=change_form)
+    return render_template('auth/change_password.html', form=form)
+
+
+@auth.route('/reset')
+def password_reset_request():
+    if not current_user.is_anonymous:
+        return redirect(url_for('main.index'))
+    form = ResetPwdRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.generate_confirmation_token()
+            send_email(current_user.email, 'Confirm Your Account',
+                       'auth/email/reset', user=user, token=token)
+            flash('A email with instructions to reset your password has been sent to you.')
+            return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password.html', form=form)

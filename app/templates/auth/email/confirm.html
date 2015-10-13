@@ -1,7 +1,7 @@
-Dear {{ user.username }},
-Welcome to ZBlog!
-To confirm your account please click on the following link:
-{{ url_for('auth.confirm', token=token, _external=True) }}
-Sincerely,
-The ZBlog Team
-Note: replies to this email address are not monitored.
+<p>Dear {{ user.username }},</p>
+<h3>Welcome to ZBlog!</h3>
+<p>To confirm your account please click on the following link:
+{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>Sincerely,</p>
+<p>The ZBlog Team</p>
+<p>Note: replies to this email address are not monitored.</p>
