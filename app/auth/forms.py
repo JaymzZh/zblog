@@ -60,6 +60,7 @@ class ResetPwdForm(Form):
         if User.query.filter_by(email=field.data).first() is None:
             raise ValidationError('Unknown email address')
 
+
 class ChangeEmailForm(Form):
     email = StringField('New Email', validators=[DataRequired(), Length(1, 64), Email()])
     password = PasswordField('Password', validators=[DataRequired()])

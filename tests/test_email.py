@@ -17,4 +17,4 @@ class test_email(unittest.TestCase):
         user = User(id=1, username='jeffiy', email='zhangmin6105@qq.com')
         token = user.generate_confirmation_token()
         self.assertIsNotNone(send_email(user.email, 'Confirm Your Account',
-                   'auth/email/confirm', user=user, token=token))
+                                        'auth/email/confirm', user=user, token=token))
