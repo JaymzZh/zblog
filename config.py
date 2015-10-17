@@ -8,7 +8,7 @@ __author__ = 'zhangmm'
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-class Config:
+class Config(object):
     SECRET_KEY = os.environ.get("SECRET_KEY") or 'hard to guess key'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     ZBLOG_MAIL_SUBJECT_PREFIX = '[ZBlog]'
