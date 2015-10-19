@@ -41,7 +41,7 @@ class Role(db.Model):
             'Administrator': (0xff, False)
         }
 
-        for r, p in roles:
+        for r, p in roles.items():
             role = Role.query.filter_by(name=r).first()
             if role is None:
                 role = Role(name=r)
