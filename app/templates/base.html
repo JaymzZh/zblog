@@ -28,7 +28,7 @@
                     {% if current_user.is_authenticated %}
                         <li class="dropdown">
                             <a href="javascript:" data-toggle="dropdown">
-                                <img src="{{ current_user }}"/>
+                                <img src="{{ current_user.gravatar(size=18) }}" />
                                 {{ current_user.username }}
                                 <b class="caret"></b>
                             </a>
