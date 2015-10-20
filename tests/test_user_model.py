@@ -53,7 +53,9 @@ class UserModelTestCase(unittest.TestCase):
 
     def test_roles_and_permissions(self):
         Role.insert_roles()
-        u = User.query.filter_by(email='zhangmin6105@qq.com')
+        role_admin = Role.query.filter_by(name='Administrator').first()
+        u = User(role_id=role_admin.id)
+        u.role = role_admin
         self.assertTrue(u.can(Permission.ADMINISTER))
 
     def test_anonymous_user(self):
