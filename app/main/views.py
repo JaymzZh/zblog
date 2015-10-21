@@ -1,39 +1,26 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-from datetime import datetime
-
-from flask import render_template, session, redirect, url_for, abort, flash
+from flask import render_template, redirect, url_for, abort, flash
 from flask.ext.login import login_required, current_user
 
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm
-from ..models import db, User, Role
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm
+from ..models import db, Permission, User, Role, Post
 from ..decorators import admin_required
 
 __author__ = 'zhangmm'
 
 
-@main.route('/')
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', current_time=datetime.utcnow())
-
-
-# @main.route('/user', methods=['GET', 'POST'])
-# def user():
-#     form = NameForm()
-#     if form.validate_on_submit():
-#         user = User.query.filter_by(username=form.name.data).first()
-#         if user is None:
-#             user = User(username=form.name.data)
-#             db.session.add(user)
-#             session["known"] = False
-#         else:
-#             session["known"] = True
-#         session["name"] = form.name.data
-#         form.name.data = ""
-#         return redirect(url_for('user'))
-#     return render_template('user.html', form=form, name=session.get('name'), known=session.get('known', False))
+    form = PostForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        return redirect(url_for('.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', form=form, posts=posts)
 
 
 @main.route('/user/<username>')
@@ -41,7 +28,8 @@ def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
-    return render_template('user.html', user=user)
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    return render_template('user.html', user=user, posts=posts)
 
 
 @main.route('/edit-profile', methods=['GET', 'POST'])
