@@ -145,7 +145,7 @@ def followers(username):
     page = request.args.get('page', 1, type=int)
     pagination = user.followers.paginate(page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
     follows = [{'user': item.follower, 'timestamp': item.timestamp} for item in pagination.items]
-    return render_template('followers.html', use=user, title='Followers of ', endpoint='.followers',
+    return render_template('followers.html', user=user, title='Followers of ', endpoint='.followers',
                            pagination=pagination, follows=follows)
 
 
@@ -158,5 +158,5 @@ def followed_by(username):
     page = request.args.get('page', 1, type=int)
     pagination = user.followed.paginate(page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
     follows = [{'user': item.followed, 'timestamp': item.timestamp} for item in pagination.items]
-    return render_template('followers.html', use=user, title='Followed by ', endpoint='.followed_by',
+    return render_template('followers.html', user=user, title='Followed by ', endpoint='.followed_by',
                            pagination=pagination, follows=follows)
