@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 {% block title %}{{ user.username }} - My Blog{% endblock %}
 {% block page_content %}
     <div class="page-header">
@@ -37,4 +38,7 @@
     </div>
     <h3>Posts by {{ user.username }}</h3>
     {% include '_posts.html' %}
+    <div class="pagination">
+        {{ macros.pagination_widget(pagination, '.index') }}
+    </div>
 {% endblock %}
