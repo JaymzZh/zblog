@@ -13,7 +13,7 @@
                     {% if user.name %}{{ user.name }}{% endif %}
                     {% if user.location %}
                         From <a href="http://www.google.cn/maps/search/{{ user.location }}"
-                               target="_blank">{{ user.location }}</a>
+                                target="_blank">{{ user.location }}</a>
                     {% endif %}
                 </p>
             {% endif %}
@@ -42,10 +42,10 @@
                 {% endif %}
             {% endif %}
             <a href="{{ url_for('.followers', username=user.username) }}">
-                Followers: <span class="badge">{{ user.followers.count() }}</span>
+                Followers: <span class="badge">{{ user.followers.count() - 1 }}</span>
             </a>
             <a href="{{ url_for('.followed_by', username=user.username) }}">
-                Following: <span class="badge">{{ user.followed.count() }}</span>
+                Following: <span class="badge">{{ user.followed.count() - 1 }}</span>
             </a>
             {% if current_user.is_authenticated and user != current_user and user.is_following(current_user) %}
                 | <span class="label label-default">Follows you</span>
@@ -54,7 +54,9 @@
     </div>
     <h3>Posts by {{ user.username }}</h3>
     {% include '_posts.html' %}
-    <div class="pagination">
-        {{ macros.pagination_widget(pagination, '.index') }}
-    </div>
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, '.index') }}
+        </div>
+    {% endif %}
 {% endblock %}

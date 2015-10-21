@@ -122,8 +122,8 @@ class User(UserMixin, db.Model):
                                backref=db.backref('follower', lazy='joined'), lazy='dynamic',
                                cascade='all, delete-orphan')
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
-                               backref=db.backref('followed', lazy='joined'), lazy='dynamic',
-                               cascade='all, delete-orphan')
+                                backref=db.backref('followed', lazy='joined'), lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -138,6 +138,10 @@ class User(UserMixin, db.Model):
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute')
+
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
 
     @password.setter
     def password(self, password):
@@ -260,6 +264,14 @@ class User(UserMixin, db.Model):
 
     def is_followed_by(self, user):
         return self.follower.filter_by(follower_id=user.id).first() is not None
+
+    @staticmethod
+    def add_self_follows():
+        for user in User.query.all():
+            if not user.is_following(user):
+                user.follow(user)
+                db.session.add(user)
+                db.session.commit()
 
     def __repr__(self):
         return '<User %r>' % self.username

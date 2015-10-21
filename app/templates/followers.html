@@ -28,7 +28,9 @@
             {% endif %}
         {% endfor %}
     </table>
-    <div class="pagination">
-        {{ macros.pagination_widget(pagination, endpoint, username = user.username) }}
-    </div>
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, endpoint, username = user.username) }}
+        </div>
+    {% endif %}
 {% endblock %}
