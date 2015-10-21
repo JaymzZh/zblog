@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
-{% block title %}{{ user.username }} - My Blog{% endblock %}
+{% block title %}{{ user.username }} - ZBlog{% endblock %}
 {% block page_content %}
     <div class="page-header">
         <img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}"/>

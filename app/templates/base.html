@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-{% block title %} My Blog {% endblock %}
+{% block title %} ZBlog {% endblock %}
 {% block head %}
     {{ super() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename = 'favicon.ico') }}"
@@ -35,7 +35,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a>
+                                    <a href="{{ url_for('main.user', username=current_user.username) }}">Edit Profile</a>
                                 </li>
                                 <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                                 <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
