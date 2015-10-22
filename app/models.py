@@ -160,6 +160,7 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
+        self.followed.append(Follow(followed=self))
 
     @property
     def password(self):
@@ -289,7 +290,7 @@ class User(UserMixin, db.Model):
         return self.followed.filter_by(followed_id=user.id).first() is not None
 
     def is_followed_by(self, user):
-        return self.follower.filter_by(follower_id=user.id).first() is not None
+        return self.followers.filter_by(follower_id=user.id).first() is not None
 
     @staticmethod
     def add_self_follows():
