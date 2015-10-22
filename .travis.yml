@@ -7,3 +7,6 @@ python:
 install: "pip install -r requirements/dev.txt"
 # command to run tests
 script: python manage.py test
+
+after_success:
+  - coveralls
