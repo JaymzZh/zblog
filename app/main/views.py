@@ -100,9 +100,9 @@ def post(id):
         return redirect(url_for('.post', id=post.id, page=-1))
     page = request.args.get('page', 1, type=int)
     if page == -1:
-        page = (post.comments.count() - 1) / current_app.config['ZBLOG_POSTS_PER_PAGE'] + 1
+        page = (post.comments.count() - 1) / current_app.config['ZBLOG_COMMENTS_PER_PAGE'] + 1
     pagination = post.comments.order_by(Comment.timestamp.asc()).paginate(
-        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+        page, per_page=current_app.config['ZBLOG_COMMENTS_PER_PAGE'], error_out=False)
     comments = pagination.items
     return render_template('post.html', posts=[post], form=form, comments=comments, pagination=pagination)
 
@@ -162,7 +162,7 @@ def followers(username):
         flash('Invalid user.')
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
-    pagination = user.followers.paginate(page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+    pagination = user.followers.paginate(page, per_page=current_app.config['ZBLOG_FOLLOWERS_PER_PAGE'], error_out=False)
     follows = [{'user': item.follower, 'timestamp': item.timestamp} for item in pagination.items]
     return render_template('followers.html', user=user, title='Followers of ', endpoint='.followers',
                            pagination=pagination, follows=follows)
@@ -175,7 +175,7 @@ def followed_by(username):
         flash('Invalid user.')
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
-    pagination = user.followed.paginate(page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+    pagination = user.followed.paginate(page, per_page=current_app.config['ZBLOG_FOLLOWERS_PER_PAGE'], error_out=False)
     follows = [{'user': item.followed, 'timestamp': item.timestamp} for item in pagination.items]
     return render_template('followers.html', user=user, title='Followed by ', endpoint='.followed_by',
                            pagination=pagination, follows=follows)
@@ -203,7 +203,7 @@ def show_followed():
 def moderate():
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
-        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+        page, per_page=current_app.config['ZBLOG_COMMENTS_PER_PAGE'], error_out=False)
     comments = pagination.items
     return render_template('moderate.html', comments=comments, pagination=pagination, page=page)
 

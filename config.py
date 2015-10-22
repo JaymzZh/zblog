@@ -15,6 +15,8 @@ class Config(object):
     ZBLOG_MAIL_SENDER = 'zhangmin6105@163.com'
     ZBLOG_ADMIN = os.environ.get('ZBlog_ADMIN') or 'zhangmin6105@163.com'
     ZBLOG_POSTS_PER_PAGE = 20
+    ZBLOG_FOLLOWERS_PER_PAGE = 50
+    ZBLOG_COMMENTS_PER_PAGE = 30
 
     @staticmethod
     def init_app(app):
