@@ -45,7 +45,7 @@ def new_post():
     post.author = g.current_user
     db.session.add(post)
     db.session.commit()
-    return jsonify(post.to_json()), 201, {'Location': url_for('api.get_posts', id=post.id, _external=True)}
+    return jsonify(post.to_json()), 201, {'Location': url_for('api.get_post', id=post.id, _external=True)}
 
 
 @api.route('/posts/<int:id>', methods=['PUT'])

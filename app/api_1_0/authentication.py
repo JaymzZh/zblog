@@ -26,6 +26,7 @@ def verify_password(email_or_token, password):
     if not user:
         return False
     g.current_user = user
+    g.token_used = False
     return user.verify_password(password)
 
 
