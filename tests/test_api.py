@@ -143,3 +143,25 @@ class APITestCase(unittest.TestCase):
         self.assertTrue(json_response['url'] == url)
         self.assertTrue(json_response['body'] == 'updated body')
         self.assertTrue(json_response['body_html'] == '<p>updated body</p>')
+
+    def test_user(self):
+        # add two users
+        r = Role.query.filter_by(name='User').first()
+        self.assertIsNotNone(r)
+        u1 = User(email='zhangmin6105@qq.com', username='zhangmm', password='cat', confirmed=True, role=r)
+        u2 = User(email='zhangmin@qq.com', username='zhangmin', password='cat', confirmed=True, role=r)
+        db.session.add_all([u1, u2])
+        db.session.commit()
+
+        # get users
+        response = self.client.get(url_for('api.get_user', id=u1.id),
+                                   headers=self.get_api_headers('zhangmin6105@qq.com', 'cat'))
+        self.assertTrue(response.status_code == 200)
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertTrue(json_response['username'] == 'zhangmm')
+        response = self.client.get(url_for('api.get_user', id=u2.id),
+                                   headers=self.get_api_headers('zhangmin@qq.com', 'cat'))
+        self.assertTrue(response.status_code == 200)
+        json_response = json.loads(response.data.decode('utf-8'))
+        self.assertTrue(json_response['username'] == 'zhangmin')
+
