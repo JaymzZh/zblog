@@ -32,7 +32,7 @@ def get_comments():
     })
 
 
-@api.route('/comment/<int:id>')
+@api.route('/comments/<int:id>')
 def get_comment(id):
     comment = Comment.query.get_or_404(id)
     return jsonify(comment.to_json())
