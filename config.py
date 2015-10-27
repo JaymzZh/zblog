@@ -17,6 +17,8 @@ class Config(object):
     ZBLOG_POSTS_PER_PAGE = 20
     ZBLOG_FOLLOWERS_PER_PAGE = 50
     ZBLOG_COMMENTS_PER_PAGE = 30
+    SQLALCHEMY_RECORD_QUERIES = True
+    ZBLOG_SLOW_DB_QUERY_TIME = 0.5
 
     @staticmethod
     def init_app(app):

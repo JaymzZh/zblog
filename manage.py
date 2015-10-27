@@ -11,7 +11,7 @@ from flask.ext.migrate import Migrate, MigrateCommand
 __author__ = 'zhangmm'
 
 COV = None
-if os.environ.get('FLASK_COVERAGE'):
+if os.environ.get('ZBLOG_COVERAGE'):
     import coverage
 
     COV = coverage.coverage(branch=True, include='app/*')
@@ -33,9 +33,9 @@ manager.add_command('db', MigrateCommand)
 @manager.command
 def test(coverage=False):
     """Run the unit tests"""
-    if coverage and os.environ.get('FLASK_COVERAGE'):
+    if coverage and os.environ.get('ZBLOG_COVERAGE'):
         import sys
-        os.environ['FLASK_COVERAGE'] = '1'
+        os.environ['ZBLOG_COVERAGE'] = '1'
         os.execvp(sys.executable, [sys.executable] + sys.argv)
     import unittest
     tests = unittest.TestLoader().discover('tests')
