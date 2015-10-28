@@ -3,7 +3,7 @@
 
 from flask import render_template, request, jsonify
 
-from . import main
+from app.main import main
 
 __author__ = 'zhangmm'
 

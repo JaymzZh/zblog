@@ -5,7 +5,7 @@ from functools import wraps
 
 from flask import g
 
-from .errors import forbidden
+from app.api_1_0.errors import forbidden
 
 __author__ = 'zhangmm'
 

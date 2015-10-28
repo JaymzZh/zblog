@@ -4,8 +4,8 @@
 from flask import current_app, render_template
 from flask.ext.mail import Message
 
-from . import mail
-from .decorators import async
+from app import mail
+from app.decorators import async
 
 __author__ = 'zhangmm'
 

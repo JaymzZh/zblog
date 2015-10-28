@@ -3,8 +3,8 @@
 
 from flask import jsonify
 
-from ..exceptions import ValidationError
-from . import api
+from app.exceptions import ValidationError
+from app.api_1_0 import api
 
 __author__ = 'zhangmm'
 

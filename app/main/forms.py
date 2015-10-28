@@ -6,7 +6,7 @@ from flask.ext.pagedown.fields import PageDownField
 from wtforms import StringField, TextAreaField, SubmitField, BooleanField, SelectField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Regexp
 
-from ..models import User, Role
+from app.models import User, Role
 
 __author__ = 'zhangmm'
 

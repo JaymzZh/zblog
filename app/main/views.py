@@ -4,11 +4,11 @@
 from flask import render_template, redirect, url_for, abort, flash, request, current_app, make_response
 from flask.ext.login import login_required, current_user
 
-from . import main
+from app.main import main
 from flask.ext.sqlalchemy import get_debug_queries
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
-from ..models import db, Permission, User, Role, Post, Comment
-from ..decorators import admin_required, permission_required
+from app.main.forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
+from app.models import db, Permission, User, Role, Post, Comment
+from app.decorators import admin_required, permission_required
 
 __author__ = 'zhangmm'
 

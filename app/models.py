@@ -11,8 +11,8 @@ from flask import current_app, request, url_for
 from markdown import markdown
 import bleach
 
-from . import db, login_manager
-from .exceptions import ValidationError
+from app import db, login_manager
+from app.exceptions import ValidationError
 
 __author__ = 'zhangmm'
 

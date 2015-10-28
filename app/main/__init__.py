@@ -9,7 +9,7 @@ __author__ = 'zhangmm'
 
 main = Blueprint('main', __name__)
 
-from . import views, errors
+from app.main import views, errors
 
 
 @main.app_context_processor

@@ -7,4 +7,4 @@ __author__ = 'zhangmm'
 
 api = Blueprint('api', __name__)
 
-from . import authentication, posts, users, comments, errors
+from app.api_1_0 import authentication, posts, users, comments, errors

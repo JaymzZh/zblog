@@ -3,11 +3,11 @@
 
 from flask import request, current_app, url_for, jsonify, g
 
-from .. import db
-from ..models import Post, Permission
-from . import api
-from .decorators import permission_required
-from .errors import forbidden
+from app import db
+from app.models import Post, Permission
+from app.api_1_0 import api
+from app.api_1_0.decorators import permission_required
+from app.api_1_0.errors import forbidden
 
 __author__ = 'zhangmm'
 

@@ -4,10 +4,10 @@
 from flask import render_template, redirect, request, url_for, flash
 from flask.ext.login import login_user, login_required, logout_user, current_user
 
-from . import auth
-from ..models import db, User
-from .forms import LoginForm, RegistrationForm, ChangePwdForm, ResetPwdForm, ResetPwdRequestForm, ChangeEmailForm
-from ..email import send_email
+from app.auth import auth
+from app.models import db, User
+from app.auth.forms import LoginForm, RegistrationForm, ChangePwdForm, ResetPwdForm, ResetPwdRequestForm, ChangeEmailForm
+from app.email import send_email
 
 __author__ = 'zhangmm'
 

@@ -4,9 +4,9 @@
 from flask import g, jsonify
 from flask.ext.httpauth import HTTPBasicAuth
 
-from ..models import AnonymousUser, User
-from .errors import unauthorized, forbidden
-from . import api
+from app.models import AnonymousUser, User
+from app.api_1_0.errors import unauthorized, forbidden
+from app.api_1_0 import api
 
 __author__ = 'zhangmm'
 

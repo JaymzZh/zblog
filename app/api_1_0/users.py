@@ -3,8 +3,8 @@
 
 from flask import jsonify, request, current_app, url_for
 
-from . import api
-from ..models import User, Post
+from app.api_1_0 import api
+from app.models import User, Post
 
 __author__ = 'zhangmm'
 
