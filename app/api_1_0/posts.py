@@ -4,9 +4,8 @@
 from flask import request, current_app, url_for, jsonify, g
 
 from app import db
-from app.models import Post, Permission
+from app.models import Post
 from app.api_1_0 import api
-from app.api_1_0.decorators import permission_required
 from app.api_1_0.errors import forbidden
 
 __author__ = 'zhangmm'
@@ -39,7 +38,6 @@ def get_post(id):
 
 
 @api.route('/posts', methods=['POST'])
-@permission_required(Permission.WRITE_ARTICLES)
 def new_post():
     post = Post.from_json(request.json)
     post.author = g.current_user
@@ -49,7 +47,6 @@ def new_post():
 
 
 @api.route('/posts/<int:id>', methods=['PUT'])
-@permission_required(Permission.WRITE_ARTICLES)
 def edit_post(id):
     post = Post.query.get_or_404(id)
     if g.current_user != post.author and not g.current_user.can(Permission.WRITE_ARTICLES):
