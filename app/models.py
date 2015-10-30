@@ -5,6 +5,7 @@ from datetime import datetime
 import hashlib
 
 from flask.ext.login import UserMixin, AnonymousUserMixin
+from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
@@ -17,16 +18,49 @@ from app.exceptions import ValidationError
 __author__ = 'zhangmm'
 
 
+class PostTags(db.Model):
+    __tablename__ = 'post_tag'
+    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), primary_key=True)
+
+    @staticmethod
+    def generate_fake(count=50):
+        from random import seed, randint
+
+        seed()
+        tag_count = Tag.query.count()
+        post_count = Post.query.count()
+        for i in range(count):
+            try:
+                t = PostTags(tag_id=randint(1, tag_count - 1),
+                             post_id=randint(1, post_count - 1))
+                db.session.add(t)
+                db.session.commit()
+            except:
+                db.session.rollback()
+
+    __table_args__ = (UniqueConstraint('tag_id', 'post_id'),)
+
+
 class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32))
 
+    posts = db.relationship('PostTags', foreign_keys=[PostTags.tag_id],
+                            backref=db.backref('posts', lazy='joined'), lazy='dynamic',
+                            cascade='all, delete-orphan')
 
-class PostTags(db.Model):
-    __tablename__ = 'post_tag'
-    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), primary_key=True)
+    @staticmethod
+    def generate_fake(count=10):
+        from random import seed
+        import forgery_py
+
+        seed()
+        for i in range(count):
+            t = Tag(name=forgery_py.internet.first_name())
+            db.session.add(t)
+            db.session.commit()
 
 
 class Post(db.Model):
@@ -38,8 +72,8 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    tags = db.relationship('PostTags', foreign_keys=[PostTags.tag_id],
-                           backref=db.backref('tag', lazy='joined'), lazy='dynamic',
+    tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id],
+                           backref=db.backref('tags', lazy='joined'), lazy='dynamic',
                            cascade='all, delete-orphan')
 
     @staticmethod
@@ -59,7 +93,8 @@ class Post(db.Model):
         user_count = User.query.count()
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
-            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
+            p = Post(title=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
+                     body=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
                      timestamp=forgery_py.date.date(True),
                      author=u)
             db.session.add(p)
@@ -142,6 +177,12 @@ class User(UserMixin, db.Model):
         except:
             return None
         return User.query.get(data['id'])
+
+    @staticmethod
+    def generate_fake():
+        u = User(email='zhangmin6105@qq.com', username='Jeffiy', password='123456')
+        db.session.add(u)
+        db.session.commit()
 
     def to_json(self):
         json_user = {

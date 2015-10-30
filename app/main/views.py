@@ -92,9 +92,9 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form=form, user=user)
 
 
-@main.route('/post/<int:id>')
-def post(id):
-    post = Post.query.get_or_404(id)    
+@main.route('/post/<title>')
+def post(title):
+    post = Post.query.get_or_404(title)
     return render_template('post.html', posts=[post])
 
 

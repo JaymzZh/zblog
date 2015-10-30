@@ -7,7 +7,7 @@ from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 
 from app import create_app, db
-from app.models import User, Post
+from app.models import User, Post, Tag, PostTags
 
 __author__ = 'zhangmm'
 
@@ -24,7 +24,7 @@ migrate = Migrate(app, db)
 
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Post=Post)
+    return dict(app=app, db=db, User=User, Post=Post, Tag=Tag, PostTags=PostTags)
 
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
@@ -65,13 +65,9 @@ def profile(length=25, profile_dir=None):
 def deploy():
     """Run deployment tasks"""
     from flask.ext.migrate import upgrade
-    from app.models import Role, User
 
     # upgrade database
     upgrade()
-
-    # user should follow them self
-    User.add_self_follows()
 
 
 if __name__ == '__main__':
