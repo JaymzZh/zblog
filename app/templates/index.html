@@ -3,30 +3,19 @@
 {% import "_macros.html" as macros %}
 {% block title %}Home - ZBlog{% endblock %}
 {% block page_content %}
-    <div class="page-header">
-        <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
-    </div>
-    <div>
-        {% if current_user.is_authenticated %}
-            {{ wtf.quick_form(form) }}
-        {% endif %}
-    </div>
-    <div class="post-tabs">
-        <ul class="nav nav-tabs">
-            <li {% if not show_followed %} class="active" {% endif %}>
-                <a href="{{ url_for('.show_all') }}">All</a>
-            </li>
-            <li {% if show_followed %} class="active" {% endif %}>
-                <a href="{{ url_for('.show_followed') }}">Followers</a>
-            </li>
-        </ul>
-        {% include '_posts.html' %}
-    </div>
-    {% if pagination %}
-        <div class="pagination">
-            {{ macros.pagination_widget(pagination, '.index') }}
+    <div class="row">
+        <div class="col-xs-3 col-xs-push-9">
+            {% include '_right.html' %}
         </div>
-    {% endif %}
+        <div class="col-xs-9 col-xs-pull-3">
+            {% include '_posts.html' %}
+            {% if pagination %}
+                <div class="pagination">
+                    {{ macros.pagination_widget(pagination, '.index') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
     {{ super() }}

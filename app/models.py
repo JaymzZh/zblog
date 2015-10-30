@@ -17,13 +17,30 @@ from app.exceptions import ValidationError
 __author__ = 'zhangmm'
 
 
+class Tag(db.Model):
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
+
+
+class PostTags(db.Model):
+    __tablename__ = 'post_tag'
+    tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), primary_key=True)
+
+
 class Post(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64))
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    tags = db.relationship('PostTags', foreign_keys=[PostTags.tag_id],
+                           backref=db.backref('tag', lazy='joined'), lazy='dynamic',
+                           cascade='all, delete-orphan')
 
     @staticmethod
     def on_change_body(target, value, oldvalue, initiator):
@@ -88,7 +105,7 @@ class User(UserMixin, db.Model):
         super(User, self).__init__(**kwargs)
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
-        
+
     @property
     def password(self):
         raise AttributeError('Password is not a readable attribute')

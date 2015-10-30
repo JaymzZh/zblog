@@ -34,16 +34,11 @@ def server_shutdown():
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    form = PostForm()
-    if form.validate_on_submit():
-        post = Post(body=form.body.data, author=current_user._get_current_object())
-        db.session.add(post)
-        return redirect(url_for('.index'))    
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
     posts = pagination.items
-    return render_template('index.html', form=form, posts=posts, pagination=pagination)
+    return render_template('index.html', posts=posts, pagination=pagination)
 
 
 @main.route('/user/<username>')
@@ -79,12 +74,10 @@ def edit_profile():
 @login_required
 def edit_profile_admin(id):
     user = User.query.get_or_404(id)
-    form = EditProfileAdminForm(user=user)
+    form = EditProfileForm(user=user)
     if form.validate_on_submit():
         user.email = form.email.data
         user.username = form.username.data
-        user.confirmed = form.confirmed.data
-        user.role = Role.query.get(form.role.data)
         user.name = form.name.data
         user.location = form.location.data
         user.about_me = form.about_me.data
@@ -93,8 +86,6 @@ def edit_profile_admin(id):
         return redirect(url_for('.user', username=user.username))
     form.email.data = user.email
     form.username.data = user.username
-    form.confirmed.data = user.confirmed
-    form.role.data = user.role_id
     form.name.data = user.name
     form.location.data = user.location
     form.about_me.data = user.about_me
@@ -111,7 +102,7 @@ def post(id):
 @login_required
 def edit(id):
     post = Post.query.get_or_404(id)
-    if current_user != post.author and not current_user.can(Permission.ADMINISTER):
+    if current_user != post.author:
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
