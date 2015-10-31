@@ -45,5 +45,7 @@ class EditProfileForm(Form):
 
 
 class PostForm(Form):
+    title = StringField('Title', validators=[DataRequired()])
+    tags = StringField('Tags')
     body = PageDownField("What's on your mind?", validators=[DataRequired()])
     submit = SubmitField('Submit')

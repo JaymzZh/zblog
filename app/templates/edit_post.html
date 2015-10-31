@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block title %}Edit Post - ZBlog{% endblock %}
+{% block title %}Edit Post - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
 {% block page_content %}
     <div class="page-header">
-        <h1>Edit Post</h1>
+        <h1>{% if is_new %} New {% else %}Edit {% endif %} Post</h1>
     </div>
     <div>
         {{ wtf.quick_form(form) }}

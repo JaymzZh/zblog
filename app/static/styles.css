@@ -9,6 +9,28 @@ div.pagination {
     margin: 0;
 }
 
+.page-content {
+    border-bottom: 1px solid #eee;
+    margin: 20px 0;
+    padding-bottom: 9px;
+}
+
+.margin-bottom-md {
+    margin-bottom: 30px;
+}
+
+.no_border{
+    border: 0;
+}
+
+.dash_border {
+    border-bottom: 1px dotted #bdbabd;
+    height: 1px;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+}
+
 div.flask-pagedown-preview {
     margin: 10px 0 10px 0;
     border: 1px solid #e0e0e0;

@@ -11,7 +11,7 @@ from app.auth.forms import LoginForm, ChangePwdForm
 __author__ = 'zhangmm'
 
 
-@auth.route('/login', methods=['GET', 'POST'])
+@auth.route('/admin-login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():

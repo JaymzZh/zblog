@@ -24,6 +24,8 @@ class Config(object):
     ZBLOG_COMMENTS_PER_PAGE = 30
     SQLALCHEMY_RECORD_QUERIES = True
     ZBLOG_SLOW_DB_QUERY_TIME = 0.5
+    ZBLOG_TITLE = 'zhangmm\' blog'
+    ZBLOG_TITLE_SUFFIX = 'ZBlog'
 
     @staticmethod
     def init_app(app):

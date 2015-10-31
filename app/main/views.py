@@ -7,7 +7,7 @@ from flask.ext.login import login_required, current_user
 from app.main import main
 from flask.ext.sqlalchemy import get_debug_queries
 from app.main.forms import EditProfileForm, PostForm
-from app.models import db, User, Post
+from app.models import db, User, Post, Tag, PostTags
 
 __author__ = 'zhangmm'
 
@@ -38,7 +38,8 @@ def index():
     pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
     posts = pagination.items
-    return render_template('index.html', posts=posts, pagination=pagination)
+    tags = Tag.query.all()
+    return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
 
 
 @main.route('/user/<username>')
@@ -53,27 +54,12 @@ def user(username):
     return render_template('user.html', user=user, posts=posts, pagination=pagination)
 
 
-@main.route('/edit-profile', methods=['GET', 'POST'])
+@main.route('/edit-profile/<username>', methods=['GET', 'POST'])
 @login_required
-def edit_profile():
-    form = EditProfileForm(user=current_user)
-    if form.validate_on_submit():
-        current_user.name = form.name.data
-        current_user.location = form.location.data
-        current_user.about_me = form.about_me.data
-        db.session.add(current_user)
-        flash('Your profile has been updated.')
-        return redirect(url_for('.user', username=current_user.username))
-    form.name.data = current_user.name
-    form.location.data = current_user.location
-    form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', form=form)
-
-
-@main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit_profile_admin(id):
-    user = User.query.get_or_404(id)
+def edit_profile(username):
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        abort(404)
     form = EditProfileForm(user=user)
     if form.validate_on_submit():
         user.email = form.email.data
@@ -94,37 +80,53 @@ def edit_profile_admin(id):
 
 @main.route('/post/<title>')
 def post(title):
-    post = Post.query.get_or_404(title)
-    return render_template('post.html', posts=[post])
+    post = Post.query.filter_by(url_title=title).first()
+    if not post:
+        abort(404)
+    return render_template('post.html', posts=[post, ], show_all=True)
 
 
-@main.route('/edit/<int:id>')
+@main.route('/tag/<name>')
+def tag(name):
+    query = Post.query.join(PostTags, PostTags.post_id == Post.id) \
+        .join(Tag, Tag.id == PostTags.tag_id).filter(Tag.name == name)
+    page = request.args.get('page', 1, type=int)
+    pagination = query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+    posts = pagination.items
+    tags = Tag.query.all()
+    return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
+
+
+@main.route('/new-post', methods=['GET', 'POST'])
 @login_required
-def edit(id):
-    post = Post.query.get_or_404(id)
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.body.data
+        # todo： add tags
+        db.session.add(post)
+        flash('The post has been added.')
+        return redirect(url_for('post', title=post.url_title))
+    return render_template('edit_post.html', form=form, is_new=True)
+
+
+@main.route('/edit/<title>', methods=['GET', 'POST'])
+@login_required
+def edit(title):
+    post = Post.query.filter_by(url_title=title).first()
+    if not post:
+        abort(404)
     if current_user != post.author:
         abort(403)
     form = PostForm()
     if form.validate_on_submit():
+        post.title = form.title.data
         post.body = form.body.data
         db.session.add(post)
         flash('The post has been updated.')
-        return redirect(url_for('post', id=post.id))
+        return redirect(url_for('post', title=post.url_title))
     form.body.data = post.body
-    return render_template('edit_post.html', form=form)
-
-
-@main.route('/all')
-@login_required
-def show_all():
-    resp = make_response(redirect(url_for('.index')))
-    resp.set_cookie('show_followed', '', max_age=30 * 24 * 60 * 60)
-    return resp
-
-
-@main.route('/followed')
-@login_required
-def show_followed():
-    resp = make_response(redirect(url_for('.index')))
-    resp.set_cookie('show_followed', '1', max_age=30 * 24 * 60 * 60)
-    return resp
+    form.title.data = post.title
+    return render_template('edit_post.html', form=form, is_new=False)

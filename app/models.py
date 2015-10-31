@@ -3,6 +3,7 @@
 
 from datetime import datetime
 import hashlib
+import string
 
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from sqlalchemy import UniqueConstraint
@@ -11,6 +12,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, request, url_for
 from markdown import markdown
 import bleach
+import pinyin
 
 from app import db, login_manager
 from app.exceptions import ValidationError
@@ -62,19 +64,35 @@ class Tag(db.Model):
             db.session.add(t)
             db.session.commit()
 
+    def __repr__(self):
+        return '<Tag %r>' % self.name
+
 
 class Post(db.Model):
     __tablename__ = 'post'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64))
+    url_title = db.Column(db.String(64), index=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id],
-                           backref=db.backref('tags', lazy='joined'), lazy='dynamic',
-                           cascade='all, delete-orphan')
+    post_tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id],
+                                backref=db.backref('tags', lazy='joined'), lazy='dynamic',
+                                cascade='all, delete-orphan')
+
+    @property
+    def tags(self):
+        return Tag.query.join(PostTags, PostTags.tag_id == Tag.id).filter(PostTags.post_id == self.id)
+
+    @property
+    def summary(self):
+        if self.body_html:
+            return self.body_html[0:300]
+        if self.body:
+            return self.body[0:300]
+        return 'possible no content!'
 
     @staticmethod
     def on_change_body(target, value, oldvalue, initiator):
@@ -83,6 +101,10 @@ class Post(db.Model):
                         'h1', 'h2', 'h3', 'p']
         target.body_html = bleach.linkify(
             bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
+
+    @staticmethod
+    def on_change_title(target, value, oldvalue, initiator):
+        target.url_title = pinyin.get(value).replace(' ', '-').lower()
 
     @staticmethod
     def generate_fake(count=100):
@@ -117,8 +139,12 @@ class Post(db.Model):
             raise ValidationError('post does not have a body')
         return Post(body=body)
 
+    def __repr__(self):
+        return '<Post %r>' % self.title
+
 
 db.event.listen(Post.body, 'set', Post.on_change_body)
+db.event.listen(Post.title, 'set', Post.on_change_title)
 
 
 class User(UserMixin, db.Model):
