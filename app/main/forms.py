@@ -24,7 +24,7 @@ class EditProfileForm(Form):
                                               'Username must have only letters number, dots and underscores')])
     name = StringField('Real name', validators=[Length(0, 64)])
     location = StringField('Location', validators=[Length(0, 64)])
-    about_me = TextAreaField('About me')
+    about_me = PageDownField('About me', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
     def __init__(self, user, *args, **kwargs):

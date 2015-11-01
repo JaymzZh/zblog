@@ -155,9 +155,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     name = db.Column(db.String(64))
     location = db.Column(db.String(64))
-    about_me = db.Column(db.Text())
-    member_since = db.Column(db.DateTime(), default=datetime.utcnow)
-    last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    about_me = db.Column(db.Text)
+    about_me_html = db.Column(db.Text)
+    member_since = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     avatar_hash = db.Column(db.String(32))
 
     posts = db.relationship('Post', backref='author', lazy='dynamic')
@@ -166,6 +167,14 @@ class User(UserMixin, db.Model):
         super(User, self).__init__(**kwargs)
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def on_change_about_me(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        target.about_me_html = bleach.linkify(
+            bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
 
     @property
     def password(self):
@@ -223,6 +232,9 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+
+db.event.listen(User.about_me, 'set', User.on_change_about_me)
 
 
 class AnonymousUser(AnonymousUserMixin):

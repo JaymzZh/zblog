@@ -130,3 +130,9 @@ def edit(title):
     form.body.data = post.body
     form.title.data = post.title
     return render_template('edit_post.html', form=form, is_new=False)
+    
+
+@main.route('/about-me')
+def about_me():
+    user = User.query.first()
+    return render_template('about_me.html', user=user)
