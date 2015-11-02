@@ -3,13 +3,12 @@
 
 import unittest
 import json
-import re
 from base64 import b64encode
 
 from flask import url_for
 
 from app import create_app, db
-from app.models import User, Role, Post, Comment
+from app.models import User, Post
 
 __author__ = 'zhangmm'
 
@@ -20,7 +19,6 @@ class APITestCase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
-        Role.insert_roles()
         self.client = self.app.test_client()
 
     def tearDown(self):
@@ -48,9 +46,7 @@ class APITestCase(unittest.TestCase):
 
     def test_bad_auth(self):
         # add a user
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u = User(email='zhangmin6105@qq.com', password='cat', confirmed=True, role=r)
+        u = User(email='zhangmin6105@qq.com', password='cat')
         db.session.add(u)
         db.session.commit()
 
@@ -60,9 +56,7 @@ class APITestCase(unittest.TestCase):
 
     def test_token_auth(self):
         # add a user
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u = User(email='zhangmin6105@qq.com', password='cat', confirmed=True, role=r)
+        u = User(email='zhangmin6105@qq.com', password='cat')
         db.session.add(u)
         db.session.commit()
 
@@ -87,9 +81,7 @@ class APITestCase(unittest.TestCase):
 
     def test_posts(self):
         # add a user
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u = User(email='zhangmin6105@qq.com', password='cat', confirmed=True)
+        u = User(email='zhangmin6105@qq.com', password='cat')
         db.session.add(u)
         db.session.commit()
 
@@ -134,10 +126,8 @@ class APITestCase(unittest.TestCase):
 
     def test_user(self):
         # add two users
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u1 = User(email='zhangmin6105@qq.com', username='zhangmm', password='cat', confirmed=True, role=r)
-        u2 = User(email='zhangmin@qq.com', username='zhangmin', password='cat', confirmed=True, role=r)
+        u1 = User(email='zhangmin6105@qq.com', username='zhangmm', password='cat')
+        u2 = User(email='zhangmin@qq.com', username='zhangmin', password='cat')
         db.session.add_all([u1, u2])
         db.session.commit()
 

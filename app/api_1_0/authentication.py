@@ -38,7 +38,7 @@ def auth_error():
 @api.before_request
 @auth.login_required
 def before_request():
-    if not g.current_user.is_anonymous and not g.current_user.confirmed:
+    if not g.current_user.is_anonymous:
         return forbidden('Unconfirmed account')
 
 

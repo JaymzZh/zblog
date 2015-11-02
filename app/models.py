@@ -63,6 +63,20 @@ class Tag(db.Model):
             db.session.add(t)
             db.session.commit()
 
+    def to_json(self):
+        json_post = {
+            'name': self.name,
+            'post_count': self.posts.count()
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post):
+        name = json_post.get('name')
+        if name is None or name == '':
+            raise ValidationError('tag does not have a name')
+        return Tag(name=name)
+
     def __repr__(self):
         return '<Tag %r>' % self.name
 
@@ -124,8 +138,10 @@ class Post(db.Model):
     def to_json(self):
         json_post = {
             'url': url_for('api.get_post', id=self.id, _external=True),
+            'title': self.title,
             'body': self.body,
             'body_html': self.body_html,
+            'tags': [name for name in self.tags],
             'timestamp': self.timestamp,
             'author': url_for('api.get_user', id=self.author_id, _external=True)
         }
@@ -133,10 +149,14 @@ class Post(db.Model):
 
     @staticmethod
     def from_json(json_post):
+        title = json_post.get('title')
+        if title is None or title == '':
+            raise ValidationError('post does not have a title')
         body = json_post.get('body')
         if body is None or body == '':
             raise ValidationError('post does not have a body')
-        return Post(body=body)
+        tags = json_post.get('tags')
+        return Post(title=title, body=body, tags=tags)
 
     def __repr__(self):
         return '<Post %r>' % self.title
