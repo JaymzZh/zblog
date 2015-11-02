@@ -85,18 +85,6 @@ class APITestCase(unittest.TestCase):
         response = self.client.get(url_for('api.get_posts'), headers=self.get_api_headers('', ''))
         self.assertTrue(response.status_code == 200)
 
-    def test_unconfirmed_account(self):
-        # add a unconfirmed user
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u = User(email='zhangmin6105@qq.com', password='cat', confirmed=False)
-        db.session.add(u)
-        db.session.commit()
-
-        # get list of posts with the unconfirmed user
-        response = self.client.get(url_for('api.get_posts'), headers=self.get_api_headers('zhangmin6105@qq.com', 'cat'))
-        self.assertTrue(response.status_code == 403)
-
     def test_posts(self):
         # add a user
         r = Role.query.filter_by(name='User').first()
@@ -164,48 +152,3 @@ class APITestCase(unittest.TestCase):
         self.assertTrue(response.status_code == 200)
         json_response = json.loads(response.data.decode('utf-8'))
         self.assertTrue(json_response['username'] == 'zhangmin')
-
-    def test_comment(self):
-        # add two users
-        r = Role.query.filter_by(name='User').first()
-        self.assertIsNotNone(r)
-        u1 = User(email='zhangmin6105@qq.com', username='zhangmm', password='cat', confirmed=True, role=r)
-        u2 = User(email='zhangmin@qq.com', username='zhangmin', password='cat', confirmed=True, role=r)
-        db.session.add_all([u1, u2])
-        db.session.commit()
-
-        # add a post
-        post = Post(body='body of post', author=u1)
-        db.session.add(post)
-        db.session.commit()
-
-        # write a comment
-        response = self.client.post(url_for('api.new_post_comment', id=post.id),
-                                    headers=self.get_api_headers('zhangmin@qq.com', 'cat'),
-                                    data=json.dumps({'body': 'Good [post](http://localhost:5000)!'}))
-        self.assertTrue(response.status_code == 201)
-        json_response = json.loads(response.data.decode('utf-8'))
-        url = response.headers.get('Location')
-        self.assertIsNotNone(url)
-        self.assertTrue(json_response['body'] == 'Good [post](http://localhost:5000)!')
-        self.assertTrue(re.sub('<.*?>', '', json_response['body_html']) == 'Good post!')
-
-        # get the new comment
-        response = self.client.get(url, headers=self.get_api_headers('zhangmin6105@qq.com', 'cat'))
-        self.assertTrue(response.status_code == 200)
-        json_response = json.loads(response.data.decode('utf-8'))
-        self.assertTrue(json_response['url'] == url)
-        self.assertTrue(json_response['body'] == 'Good [post](http://localhost:5000)!')
-
-        # add another comment
-        comment = Comment(body='Thank you', author=u1, post=post)
-        db.session.add(comment)
-        db.session.commit()
-
-        # get the two comments from the post
-        response = self.client.get(url_for('api.get_post_comments', id=post.id),
-                                   headers=self.get_api_headers('zhangmin@qq.com', 'cat'))
-        self.assertTrue(response.status_code == 200)
-        json_response = json.loads(response.data.decode('utf-8'))
-        self.assertIsNotNone(json_response.get('comments'))
-        self.assertTrue(json_response.get('count', 0) == 2)

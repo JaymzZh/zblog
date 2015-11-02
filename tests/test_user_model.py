@@ -43,66 +43,6 @@ class UserModelTestCase(unittest.TestCase):
         u2 = User(password='cat')
         self.assertTrue(u1.password_hash != u2.password_hash)
 
-    def test_valid_confirmation_token(self):
-        u = User(password='cat')
-        db.session.add(u)
-        db.session.commit()
-        token = u.generate_confirmation_token()
-        self.assertTrue(u.confirm(token))
-
-    def test_invalid_confirmation_token(self):
-        u1 = User(password='cat')
-        u2 = User(password='dog')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        token = u1.generate_confirmation_token()
-        self.assertFalse(u2.confirm(token))
-
-    def test_expired_confirmation_token(self):
-        u = User(password='cat')
-        db.session.add(u)
-        db.session.commit()
-        token = u.generate_confirmation_token(1)
-        time.sleep(2)
-        self.assertFalse(u.confirm(token))
-
-    def test_valid_reset_token(self):
-        u = User(password='cat')
-        db.session.add(u)
-        db.session.commit()
-        token = u.generate_reset_token()
-        self.assertTrue(u.reset_password(token, 'dog'))
-        self.assertTrue(u.verify_password('dog'))
-
-    def test_invalid_reset_token(self):
-        u1 = User(password='cat')
-        u2 = User(password='dog')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        token = u1.generate_confirmation_token()
-        self.assertFalse(u2.reset_password(token, 'horse'))
-        self.assertTrue(u2.verify_password('dog'))
-
-    def test_valid_email_change_token(self):
-        u = User(email='zhangmin6105@qq.com', password='cat')
-        db.session.add(u)
-        db.session.commit()
-        token = u.generate_email_change_token('test@test.com')
-        self.assertTrue(u.change_email(token))
-        self.assertTrue(u.email == 'test@test.com')
-
-    def test_invalid_emain_change_token(self):
-        u1 = User(email='zhangmin6105@qq.com', password='cat')
-        u2 = User(email='zhangmin@qq.com', password='dog')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        token = u1.generate_email_change_token('test@test.com')
-        self.assertFalse(u2.change_email(token))
-        self.assertTrue(u2.email == 'zhangmin@qq.com')
-
     def test_duplicate_email_change_token(self):
         u1 = User(email='zhangmin6105@qq.com', password='cat')
         u2 = User(email='zhangmin@qq.com', password='dog')
@@ -112,11 +52,6 @@ class UserModelTestCase(unittest.TestCase):
         token = u2.generate_email_change_token('test@test.com')
         self.assertFalse(u1.change_email(token))
         self.assertTrue(u2.email == 'zhangmin@qq.com')
-
-    def test_roles_and_permissions(self):
-        u = User(email='test@test.com', password='cat')
-        self.assertTrue(u.can(Permission.WRITE_ARTICLES))
-        self.assertFalse(u.can(Permission.MODERATE_COMMENTS))
 
     def test_anonymous_user(self):
         u = AnonymousUser()
@@ -152,40 +87,3 @@ class UserModelTestCase(unittest.TestCase):
         self.assertTrue('r=pg' in gravatar_pg)
         self.assertTrue('d=retro' in gravatar_retro)
         self.assertTrue('https://secure.gravatar.com/avatar/7c1d6daaabe72a964b3a42609e3f2d2b' in gravatar_ssl)
-
-    def test_follows(self):
-        u1 = User(email='zhangmin6105@qq.com', password='cat')
-        u2 = User(email='zhangmin@qq.com', password='dog')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        self.assertFalse(u1.is_following(u2))
-        self.assertFalse(u1.is_followed_by(u2))
-        timestamp_before = datetime.utcnow()
-        u1.follow(u2)
-        db.session.add(u1)
-        db.session.commit()
-        timestamp_after = datetime.utcnow()
-        self.assertTrue(u1.is_following(u2))
-        self.assertFalse(u1.is_followed_by(u2))
-        self.assertTrue(u2.is_followed_by(u1))
-        self.assertTrue(u1.followed.count() == 2)
-        self.assertTrue(u2.followers.count() == 2)
-        f = u1.followed.all()[-1]
-        self.assertTrue(f.followed == u2)
-        self.assertTrue(timestamp_before <= f.timestamp <= timestamp_after)
-        f = u2.followers.all()[-1]
-        self.assertTrue(f.follower == u1)
-        u1.unfollow(u2)
-        db.session.add(u1)
-        db.session.commit()
-        self.assertTrue(u1.followed.count() == 1)
-        self.assertTrue(u2.followers.count() == 1)
-        self.assertTrue(Follow.query.count() == 2)
-        u2.follow(u1)
-        db.session.add(u2)
-        db.session.add(u1)
-        db.session.commit()
-        db.session.delete(u2)
-        db.session.commit()
-        self.assertTrue(Follow.query.count() == 1)

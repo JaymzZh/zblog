@@ -3,7 +3,6 @@
 
 from datetime import datetime
 import hashlib
-import string
 
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from sqlalchemy import UniqueConstraint

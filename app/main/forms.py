@@ -3,7 +3,7 @@
 
 from flask.ext.wtf import Form
 from flask.ext.pagedown.fields import PageDownField
-from wtforms import StringField, TextAreaField, SubmitField, BooleanField, SelectField, ValidationError
+from wtforms import StringField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Length, Email, Regexp
 
 from app.models import User
@@ -48,4 +48,9 @@ class PostForm(Form):
     title = StringField('Title', validators=[DataRequired()])
     tags = StringField('Tags')
     body = PageDownField("What's on your mind?", validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class TagForm(Form):
+    name = StringField('Tag name')
     submit = SubmitField('Submit')

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # encoding:utf-8
 
-from flask import render_template, redirect, url_for, abort, flash, request, current_app, make_response
+from flask import render_template, redirect, url_for, abort, flash, request, current_app
 from flask.ext.login import login_required, current_user
+from sqlalchemy import func
 
 from app.main import main
 from flask.ext.sqlalchemy import get_debug_queries
-from app.main.forms import EditProfileForm, PostForm
+from app.main.forms import EditProfileForm, PostForm, TagForm
 from app.models import db, User, Post, Tag, PostTags
 
 __author__ = 'zhangmm'
@@ -54,7 +55,7 @@ def user(username):
     return render_template('user.html', user=user, posts=posts, pagination=pagination)
 
 
-@main.route('/edit-profile/<username>', methods=['GET', 'POST'])
+@main.route('/user/<username>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile(username):
     user = User.query.filter_by(username=username).first()
@@ -68,7 +69,7 @@ def edit_profile(username):
         user.location = form.location.data
         user.about_me = form.about_me.data
         db.session.add(user)
-        flash('The profile has been updated.')
+        flash('个人信息已更新.')
         return redirect(url_for('.user', username=user.username))
     form.email.data = user.email
     form.username.data = user.username
@@ -86,6 +87,40 @@ def post(title):
     return render_template('post.html', posts=[post, ], show_all=True)
 
 
+@main.route('/post/new', methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.body.data
+        # todo： add tags
+        db.session.add(post)
+        flash('文章已发布.')
+        return redirect(url_for('post', title=post.url_title))
+    return render_template('edit_post.html', form=form, is_new=True)
+
+
+@main.route('/post/<title>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_post(title):
+    post = Post.query.filter_by(url_title=title).first()
+    if not post:
+        abort(404)
+    if current_user != post.author:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.body.data
+        db.session.add(post)
+        flash('文章已更新.')
+        return redirect(url_for('post', title=post.url_title))
+    form.body.data = post.body
+    form.title.data = post.title
+    return render_template('edit_post.html', form=form, is_new=False)
+
+
 @main.route('/tag/<name>')
 def tag(name):
     query = Post.query.join(PostTags, PostTags.post_id == Post.id) \
@@ -98,39 +133,48 @@ def tag(name):
     return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
 
 
-@main.route('/new-post', methods=['GET', 'POST'])
+@main.route('/tags')
 @login_required
-def new_post():
-    form = PostForm()
-    if form.validate_on_submit():
-        post.title = form.title.data
-        post.body = form.body.data
-        # todo： add tags
-        db.session.add(post)
-        flash('The post has been added.')
-        return redirect(url_for('post', title=post.url_title))
-    return render_template('edit_post.html', form=form, is_new=True)
+def tags():
+    tags = db.session.query(Tag.name, func.count(Tag.name).label('post_count')).join(Tag.posts).group_by(
+        Tag.name).all()
+    return render_template('tags.html', tags=tags)
 
 
-@main.route('/edit/<title>', methods=['GET', 'POST'])
+@main.route('/tag/<name>/edit', methods=['GET', 'POST'])
 @login_required
-def edit(title):
-    post = Post.query.filter_by(url_title=title).first()
-    if not post:
+def edit_tag(name):
+    tag = Tag.query.filter_by(name=name).first()
+    if not tag:
         abort(404)
-    if current_user != post.author:
-        abort(403)
-    form = PostForm()
+    form = TagForm()
     if form.validate_on_submit():
-        post.title = form.title.data
-        post.body = form.body.data
-        db.session.add(post)
-        flash('The post has been updated.')
-        return redirect(url_for('post', title=post.url_title))
-    form.body.data = post.body
-    form.title.data = post.title
-    return render_template('edit_post.html', form=form, is_new=False)
-    
+        tag.name = form.name.data
+        db.session.add(tag)
+        flash('标签已更新.')
+        return redirect(url_for('tag'))
+    form.name.data = tag.name
+    return render_template('edit_tag.html', form=form)
+
+
+@main.route('/tag/<name>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_tag(name):
+    if request.method == 'GET':
+        tag = Tag.query.filter_by(name=name).first()
+        if not tag:
+            abort(404)
+        return render_template('delete_tag.html', tag=tag)
+    if request.method == 'POST':
+        tag = Tag.query.filter_by(name=name).first()
+        if not tag:
+            abort(404)
+        db.session.delete(tag)
+        PostTags.query.filter_by(tag_id=tag.id).delete()
+        flash('标签已删除.')
+        return redirect(url_for('.tags'))
+    abort(404)
+
 
 @main.route('/about-me')
 def about_me():

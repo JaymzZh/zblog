@@ -11,7 +11,7 @@ from app.auth.forms import LoginForm, ChangePwdForm
 __author__ = 'zhangmm'
 
 
-@auth.route('/admin-login', methods=['GET', 'POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -19,7 +19,7 @@ def login():
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('main.index'))
-        flash('Invalid username or password.')
+        flash('用户名或密码不正确.')
     return render_template('auth/login.html', form=form)
 
 
@@ -27,7 +27,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.')
+    flash('已退出.')
     return redirect(url_for('main.index'))
 
 
@@ -46,8 +46,8 @@ def change_password():
             current_user.password = form.password.data
             db.session.add(current_user)
             logout_user()
-            flash('Your password has been changed, please login again.')
+            flash('密码已更改, 请重新登录.')
             return redirect(url_for('auth.login'))
         else:
-            flash('Your old password is incorrect.')
+            flash('你的久密码不正确，请重新输入.')
     return render_template('auth/change_password.html', form=form)

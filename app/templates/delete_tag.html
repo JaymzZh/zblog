@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}{{ current_user.username }} - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
+{% block page_content %}
+    <div class="page-header">
+        <h1>Delete Tag</h1>
+    </div>
+    <div>
+        <form action="{{ url_for('.delete_tag', name=tag.name) }}" method="post">
+            <h3>确定要删除'{{ tag.name }}'标签吗？</h3>
+            <button class="btn btn-md btn-danger" type="submit">Delete</button>
+            <a href="{{ url_for('.tags') }}">
+                <span class="btn btn-md btn-default">Cancel</span>
+            </a>
+        </form>
+    </div>
+{% endblock %}

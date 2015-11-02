@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}{{ current_user.username }} - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
+{% block page_content %}
+    <div class="page-header">
+        <h1>标签列表</h1>
+    </div>
+    <div>
+        <table class="table table-bordered table-responsive">
+            <thead>
+            <tr>
+                <td>名称</td>
+                <td>文章总数</td>
+                <td>操作</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tag in tags %}
+                <tr>
+                    <td>{{ tag.name }}</td>
+                    <td>{{ tag.post_count }}</td>
+                    <td>
+                        <a href="{{ url_for('.edit_tag', name=tag.name) }}">
+                            <span class="label label-primary">Edit</span>
+                        </a>
+                        <a href="{{ url_for('.delete_tag', name=tag.name) }}">
+                            <span class="label label-danger">Delete</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
