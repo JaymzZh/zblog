@@ -2,10 +2,17 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 {% block title %}{{ config['ZBLOG_TITLE'] }}{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jqcloud/jqcloud.css') }}">
+{% endblock %}
 {% block page_content %}
     <div class="row">
         <div class="col-xs-3 col-xs-push-9">
-            {% include '_right.html' %}
+            <div class="well">
+                <div class="page-header">标签云</div>
+                <div id="tag-well"></div>
+            </div>
         </div>
         <div class="col-xs-9 col-xs-pull-3">
             {% include '_posts.html' %}
@@ -20,4 +27,16 @@
 {% block scripts %}
     {{ super() }}
     {{ pagedown.include_pagedown() }}
+    <script src="{{ url_for('static', filename='jqcloud/jqcloud-1.0.4.min.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        var words = [];
+        {% for tag in tags %}
+            words.push
+            ({text: "{{ tag.name }}", weight: {{ tag.posts.count() }}, link: "{{ url_for('.tag', name=tag.name) }}"});
+        {% endfor %}
+        $('#tag-well').jQCloud(words, {
+            autoResize: true,
+            shape: 'rectangular'
+        })
+    </script>
 {% endblock %}

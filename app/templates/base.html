@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-{% block title %} ZBlog {% endblock %}
+{% block title %} {{ config['ZBLOG_TITLE'] }} {% endblock %}
 {% block head %}
     {{ super() }}
     <link rel="shortcut icon" href="{{ url_for('static', filename = 'favicon.ico') }}"

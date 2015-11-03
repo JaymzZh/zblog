@@ -19,7 +19,7 @@ div.pagination {
     margin-bottom: 30px;
 }
 
-.no_border{
+.no_border {
     border: 0;
 }
 
@@ -47,4 +47,15 @@ div.flask-pagedown-preview h2 {
 
 div.flask-pagedown-preview h3 {
     font-size: 120%;
+}
+
+.well .page-header {
+    padding-bottom: 9px;
+    margin: 0;
+    font-size: 17px;
+    border-bottom: 1px solid #eee;
+}
+
+#tag-well {
+    height: 360px;
 }
