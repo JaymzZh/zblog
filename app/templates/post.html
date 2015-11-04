@@ -4,7 +4,6 @@
 {% block title %} {{ posts[0].title }} - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
 {% block page_content %}
     {% include '_posts.html' %}
-    <hr class="dash_border">
     <h4 id="comments">评论</h4>
     <div id="disqus_thread"></div>
 {% endblock %}
