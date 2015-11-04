@@ -95,8 +95,7 @@ class Post(db.Model):
 
     @property
     def tags(self):
-        tags = Tag.query.join(PostTags, PostTags.tag_id == Tag.id).filter(PostTags.post_id == self.id).all()
-        return ','.join([tag.name for tag in tags])
+        return Tag.query.join(PostTags, PostTags.tag_id == Tag.id).filter(PostTags.post_id == self.id)
 
     @property
     def summary(self):
