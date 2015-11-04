@@ -3,7 +3,6 @@
 
 from datetime import datetime
 import hashlib
-
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,7 +11,6 @@ from flask import current_app, request, url_for
 from markdown import markdown
 import bleach
 import pinyin
-
 from app import db, login_manager
 from app.exceptions import ValidationError
 
@@ -49,7 +47,7 @@ class Tag(db.Model):
     name = db.Column(db.String(32))
 
     posts = db.relationship('PostTags', foreign_keys=[PostTags.tag_id],
-                            backref=db.backref('posts', lazy='joined'), lazy='dynamic',
+                            backref=db.backref('tags', lazy='joined'), lazy='dynamic',
                             cascade='all, delete-orphan')
 
     @staticmethod
@@ -92,12 +90,13 @@ class Post(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     post_tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id],
-                                backref=db.backref('tags', lazy='joined'), lazy='dynamic',
+                                backref=db.backref('posts', lazy='joined'), lazy='dynamic',
                                 cascade='all, delete-orphan')
 
     @property
     def tags(self):
-        return Tag.query.join(PostTags, PostTags.tag_id == Tag.id).filter(PostTags.post_id == self.id)
+        tags = Tag.query.join(PostTags, PostTags.tag_id == Tag.id).filter(PostTags.post_id == self.id).all()
+        return ','.join([tag.name for tag in tags])
 
     @property
     def summary(self):

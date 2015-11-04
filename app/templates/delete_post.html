@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block title %}删除标签 - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
+{% block title %}Delete Post - {{ config['ZBLOG_TITLE_SUFFIX'] }}{% endblock %}
 {% block page_content %}
     <div class="page-header">
-        <h1>Delete Tag</h1>
+        <h1>Delete Post</h1>
     </div>
     <div>
-        <form action="{{ url_for('.delete_tag', name=tag.name) }}" method="post">
-            <h3>确定要删除'{{ tag.name }}'标签吗？</h3>
+        <form action="{{ url_for('.delete_post', title=post.url_title) }}" method="post">
+            <h3>确定要删除文章'{{ post.title }}'吗？</h3>
             <button class="btn btn-md btn-danger" type="submit">Delete</button>
-            <a href="{{ url_for('.tags') }}">
+            <a href="{{ url_for('.posts') }}">
                 <span class="btn btn-md btn-default">Cancel</span>
             </a>
         </form>

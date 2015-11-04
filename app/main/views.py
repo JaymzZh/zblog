@@ -4,7 +4,6 @@
 from flask import render_template, redirect, url_for, abort, flash, request, current_app
 from flask.ext.login import login_required, current_user
 from sqlalchemy import func
-
 from app.main import main
 from flask.ext.sqlalchemy import get_debug_queries
 from app.main.forms import EditProfileForm, PostForm, TagForm
@@ -87,6 +86,15 @@ def post(title):
     return render_template('post.html', posts=[post, ], show_all=True)
 
 
+@main.route('/posts')
+def posts():
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+    posts = pagination.items
+    return render_template('posts.html', posts=posts, pagination=pagination)
+
+
 @main.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -131,6 +139,24 @@ def tag(name):
     posts = pagination.items
     tags = Tag.query.all()
     return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
+
+
+@main.route('/post/<title>/delete', methods=['GET', 'POST'])
+def delete_post(title):
+    if request.method == 'GET':
+        post = Post.query.filter_by(url_title=title).first()
+        if not post:
+            abort(404)
+        return render_template('delete_post.html', post=post)
+    if request.method == 'POST':
+        post = Post.query.filter_by(url_title=title).first()
+        if not post:
+            abort(404)
+        db.session.delete(post)
+        PostTags.query.filter_by(post_id=post.id).delete()
+        flash('文章已删除.')
+        return redirect(url_for('.posts'))
+    abort(404)
 
 
 @main.route('/tags')

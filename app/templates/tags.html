@@ -17,7 +17,7 @@
             <tbody>
             {% for tag in tags %}
                 <tr>
-                    <td>{{ tag.name }}</td>
+                    <td><a href="{{ url_for('.tag', name=tag.name) }}" target="_blank">{{ tag.name }}</a></td>
                     <td>{{ tag.post_count }}</td>
                     <td>
                         <a href="{{ url_for('.edit_tag', name=tag.name) }}">
