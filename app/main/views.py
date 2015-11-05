@@ -99,13 +99,19 @@ def posts():
 @login_required
 def new_post():
     form = PostForm()
+    post = Post()
     if form.validate_on_submit():
         post.title = form.title.data
         post.body = form.body.data
-        # todo： add tags
+        post.author = current_user
         db.session.add(post)
+        db.session.commit()
+        tag_ids = form.tags.data
+        for tag_id in tag_ids:
+            post_tags = PostTags(post_id=post.id, tag_id=tag_id)
+            db.session.add(post_tags)
         flash('文章已发布.')
-        return redirect(url_for('post', title=post.url_title))
+        return redirect(url_for('.post', title=post.url_title))
     return render_template('edit_post.html', form=form, is_new=True)
 
 
@@ -122,23 +128,18 @@ def edit_post(title):
         post.title = form.title.data
         post.body = form.body.data
         db.session.add(post)
+        for tag in post.tags:
+            db.session.delete(tag)
+        tag_ids = form.tags.data
+        for tag_id in tag_ids:
+            post_tags = PostTags(post_id=post.id, tag_id=tag_id)
+            db.session.add(post_tags)
         flash('文章已更新.')
-        return redirect(url_for('post', title=post.url_title))
-    form.body.data = post.body
+        return redirect(url_for('.post', title=post.url_title))
     form.title.data = post.title
+    form.tags.data = [tag.id for tag in post.tags]
+    form.body.data = post.body
     return render_template('edit_post.html', form=form, is_new=False)
-
-
-@main.route('/tag/<name>')
-def tag(name):
-    query = Post.query.join(PostTags, PostTags.post_id == Post.id) \
-        .join(Tag, Tag.id == PostTags.tag_id).filter(Tag.name == name)
-    page = request.args.get('page', 1, type=int)
-    pagination = query.order_by(Post.timestamp.desc()).paginate(
-        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
-    posts = pagination.items
-    tags = Tag.query.all()
-    return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
 
 
 @main.route('/post/<title>/delete', methods=['GET', 'POST'])
@@ -157,6 +158,18 @@ def delete_post(title):
         flash('文章已删除.')
         return redirect(url_for('.posts'))
     abort(404)
+
+
+@main.route('/tag/<name>')
+def tag(name):
+    query = Post.query.join(PostTags, PostTags.post_id == Post.id) \
+        .join(Tag, Tag.id == PostTags.tag_id).filter(Tag.name == name)
+    page = request.args.get('page', 1, type=int)
+    pagination = query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['ZBLOG_POSTS_PER_PAGE'], error_out=False)
+    posts = pagination.items
+    tags = Tag.query.all()
+    return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
 
 
 @main.route('/tags')

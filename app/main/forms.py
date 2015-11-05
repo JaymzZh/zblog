@@ -3,10 +3,9 @@
 
 from flask.ext.wtf import Form
 from flask.ext.pagedown.fields import PageDownField
-from wtforms import StringField, SubmitField, ValidationError
+from wtforms import StringField, SubmitField, ValidationError, SelectMultipleField
 from wtforms.validators import DataRequired, Length, Email, Regexp
-
-from app.models import User
+from app.models import User, Tag
 
 __author__ = 'zhangmm'
 
@@ -46,9 +45,13 @@ class EditProfileForm(Form):
 
 class PostForm(Form):
     title = StringField('Title', validators=[DataRequired()])
-    tags = StringField('Tags')
+    tags = SelectMultipleField('Tags', coerce=int)
     body = PageDownField("What's on your mind?", validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+    def __init__(self, *args, **kwargs):
+        super(PostForm, self).__init__(*args, **kwargs)
+        self.tags.choices = [(tag.id, tag.name) for tag in Tag.query.order_by(Tag.name).all()]
 
 
 class TagForm(Form):
