@@ -172,12 +172,19 @@ def tag(name):
     return render_template('index.html', posts=posts, pagination=pagination, tags=tags, show_all=False)
 
 
-@main.route('/tags')
+@main.route('/tags', methods=['GET', 'POST'])
 @login_required
 def tags():
+    form = TagForm()
+    tag = Tag()
+    if form.validate_on_submit():
+        tag.name = form.name.data
+        db.session.add(tag)
+        flash('标签已添加')
+    form.name.data = tag.name
     tags = db.session.query(Tag.name, func.count(Tag.name).label('post_count')).join(Tag.posts).group_by(
         Tag.name).all()
-    return render_template('tags.html', tags=tags)
+    return render_template('tags.html', tags=tags, form=form)
 
 
 @main.route('/tag/<name>/edit', methods=['GET', 'POST'])

@@ -19,6 +19,10 @@ div.pagination {
     margin-bottom: 30px;
 }
 
+.margin-top-sm {
+    margin-top: 10px;
+}
+
 .no_border {
     border: 0;
 }
