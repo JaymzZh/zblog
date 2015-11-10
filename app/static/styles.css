@@ -63,3 +63,23 @@ div.flask-pagedown-preview h3 {
 #tag-well {
     height: 360px;
 }
+
+#google_translate_element{
+    position: absolute;
+    top: 12px;
+    left: 3px;
+    /* older safari/Chrome browsers */  
+    -webkit-opacity: 0.5;  
+    /* Netscape and Older than Firefox 0.9 */  
+    -moz-opacity: 0.5;  
+    /* Safari 1.x (pre WebKit!) 老式khtml内核的Safari浏览器*/  
+    -khtml-opacity: 0.5;  
+    /* IE9 + etc...modern browsers */  
+    opacity: .5;  
+    /* IE 4-9 */  
+    filter:alpha(opacity=50);  
+    /*This works in IE 8 & 9 too*/  
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";  
+    /*IE4-IE9*/  
+    filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+}
