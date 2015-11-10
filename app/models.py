@@ -31,8 +31,7 @@ class PostTags(db.Model):
         post_count = Post.query.count()
         for i in range(count):
             try:
-                t = PostTags(tag_id=randint(1, tag_count - 1),
-                             post_id=randint(1, post_count - 1))
+                t = PostTags(tag_id=randint(1, tag_count - 1), post_id=randint(1, post_count - 1))
                 db.session.add(t)
                 db.session.commit()
             except:
@@ -46,9 +45,8 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32))
 
-    posts = db.relationship('PostTags', foreign_keys=[PostTags.tag_id],
-                            backref=db.backref('tags', lazy='joined'), lazy='dynamic',
-                            cascade='all, delete-orphan')
+    posts = db.relationship('PostTags', foreign_keys=[PostTags.tag_id], backref=db.backref('tags', lazy='joined'),
+                            lazy='dynamic', cascade='all, delete-orphan')
 
     @staticmethod
     def generate_fake(count=10):
@@ -62,10 +60,7 @@ class Tag(db.Model):
             db.session.commit()
 
     def to_json(self):
-        json_post = {
-            'name': self.name,
-            'post_count': self.posts.count()
-        }
+        json_post = {'name': self.name, 'post_count': self.posts.count()}
         return json_post
 
     @staticmethod
@@ -89,9 +84,8 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    post_tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id],
-                                backref=db.backref('posts', lazy='joined'), lazy='dynamic',
-                                cascade='all, delete-orphan')
+    post_tags = db.relationship('PostTags', foreign_keys=[PostTags.post_id], backref=db.backref('posts', lazy='joined'),
+                                lazy='dynamic', cascade='all, delete-orphan')
 
     @property
     def tags(self):
@@ -107,8 +101,7 @@ class Post(db.Model):
 
     @staticmethod
     def on_change_body(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.body_html = bleach.linkify(
             bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
@@ -127,22 +120,15 @@ class Post(db.Model):
         for i in range(count):
             u = User.query.offset(randint(0, user_count - 1)).first()
             p = Post(title=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
-                     body=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
-                     timestamp=forgery_py.date.date(True),
+                     body=forgery_py.lorem_ipsum.sentences(randint(1, 3)), timestamp=forgery_py.date.date(True),
                      author=u)
             db.session.add(p)
             db.session.commit()
 
     def to_json(self):
-        json_post = {
-            'url': url_for('api.get_post', id=self.id, _external=True),
-            'title': self.title,
-            'body': self.body,
-            'body_html': self.body_html,
-            'tags': [name for name in self.tags],
-            'timestamp': self.timestamp,
-            'author': url_for('api.get_user', id=self.author_id, _external=True)
-        }
+        json_post = {'url': url_for('api.get_post', id=self.id, _external=True), 'title': self.title, 'body': self.body,
+                     'body_html': self.body_html, 'tags': [name for name in self.tags], 'timestamp': self.timestamp,
+                     'author': url_for('api.get_user', id=self.author_id, _external=True)}
         return json_post
 
     @staticmethod
@@ -187,8 +173,7 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def on_change_about_me(target, value, oldvalue, initiator):
-        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
                         'h1', 'h2', 'h3', 'p']
         target.about_me_html = bleach.linkify(
             bleach.clean(markdown(value, output_format='html'), tags=allowed_tags, strip=True))
@@ -237,14 +222,10 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def to_json(self):
-        json_user = {
-            'url': url_for('api.get_post', id=self.id, _external=True),
-            'username': self.username,
-            'member_since': self.member_since,
-            'last_seen': self.last_seen,
-            'posts': url_for('api.get_user_posts', id=self.id, _external=True),
-            'post_count': self.posts.count()
-        }
+        json_user = {'url': url_for('api.get_post', id=self.id, _external=True), 'username': self.username,
+                     'member_since': self.member_since, 'last_seen': self.last_seen,
+                     'posts': url_for('api.get_user_posts', id=self.id, _external=True),
+                     'post_count': self.posts.count()}
         return json_user
 
     def __repr__(self):
