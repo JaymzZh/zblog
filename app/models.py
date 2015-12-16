@@ -71,7 +71,7 @@ class Tag(db.Model):
         return Tag(name=name)
 
     def __repr__(self):
-        return '<Tag %r>' % self.name
+        return '<Tag {0!r}>'.format(self.name)
 
 
 class Post(db.Model):
@@ -143,7 +143,7 @@ class Post(db.Model):
         return Post(title=title, body=body, tags=tags)
 
     def __repr__(self):
-        return '<Post %r>' % self.title
+        return '<Post {0!r}>'.format(self.title)
 
 
 db.event.listen(Post.body, 'set', Post.on_change_body)
@@ -229,7 +229,7 @@ class User(UserMixin, db.Model):
         return json_user
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<User {0!r}>'.format(self.username)
 
 
 db.event.listen(User.about_me, 'set', User.on_change_about_me)

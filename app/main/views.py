@@ -16,8 +16,8 @@ __author__ = 'zhangmm'
 def after_request(response):
     for query in get_debug_queries():
         if query.duration >= current_app.config['ZBLOG_SLOW_DB_QUERY_TIME']:
-            current_app.logger.warning('Slow query: %s\nParameters: %s\nDuration: %s\nContext: %s' %
-                                       query.statement, query.parameters, query.duration, query.context)
+            current_app.logger.warning('Slow query: {0!s}\nParameters: {1!s}\nDuration: {2!s}\nContext: {3!s}'.format(*
+                                       query.statement), query.parameters, query.duration, query.context)
     return response
 
 
